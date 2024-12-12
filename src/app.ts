@@ -27,17 +27,44 @@ const consultasFlow = addKeyword<Provider, Database>(EVENTS.ACTION)
     .addAnswer(`Este es para consultas`)
 
 const welcomeFlow = addKeyword<Provider, Database>(EVENTS.WELCOME)
-    .addAnswer(`Este es el flujo Welcome`, {
-        delay: 100,
-    },
-        async (ctx, ctxFn) => {
-            if (ctx.body.includes("casas")) {
-                await ctxFn.flowDynamic("Escribiste casas")
-            } else {
-                await ctxFn.flowDynamic("Escribiste otra cosa")
+    .addAnswer('¡Hola! 👋 Bienvenido al asistente virtual de Glaretum. Estoy aquí para ayudarte con lo que necesites. ¿En qué te puedo asistir hoy?')
+    .addAnswer([
+        'Por favor, elige una de las siguientes opciones:',
+        '1. Hacer una reservacion',
+        '2. Consultar el costo de reparacion',
+        '3. Ver el estatus de tu orden',
+        '4. Otra informacion'
+    ],
+        { capture: true },
+        // {
+        //     buttons: [
+        //         { body: 'Hacer una reservacion' },
+        //         { body: 'Consultar el costo de reparacion' },
+        //         { body: 'Ver el estatus de tu orden' },
+        //         { body: 'Otra informacion' }
+        //     ]
+        // }
+        async (ctx, { fallBack, flowDynamic }) => {
+            const body = ctx.body;
+            switch (body) {
+                case '1':
+                case 'Hacer una reservacion':
+                    return await flowDynamic('Escogiste hacer reservacion');
+                case '2':
+                case 'Consultar el costo de reparacion':
+                    return await flowDynamic('Escogiste consultar el precio de una reparacion');
+                case '3':
+                case 'Ver el estatus de tu orden':
+                case '4':
+                case 'Otra informacion':
+                    return await flowDynamic('Un momento mientras te transfiero con un especialista');
+                default:
+                    return fallBack(
+                        "Respuesta no válida, por favor selecciona una de las opciones."
+                    );
             }
-            console.log(ctx.body)
-        })
+        }
+    )
 
 // const menu = "Este es el menu de opciones, elegi opciones 1,2,3,4,5 o 0"
 const menuFlow = addKeyword<Provider, Database>("Menu").addAnswer(
