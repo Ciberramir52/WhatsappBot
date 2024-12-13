@@ -5,6 +5,7 @@ import { MetaProvider as Provider } from '@builderbot/provider-meta'
 import path from 'path'
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { reservacionFlow, horarioLVFlow, horarioSFlow, confirmacionReservacionFlow } from './reservaciones';
 
 dotenv.config()
 
@@ -25,46 +26,6 @@ const reservarFlow = addKeyword<Provider, Database>(EVENTS.ACTION)
 
 const consultasFlow = addKeyword<Provider, Database>(EVENTS.ACTION)
     .addAnswer(`Este es para consultas`)
-
-const welcomeFlow = addKeyword<Provider, Database>(EVENTS.WELCOME)
-    .addAnswer('¡Hola! 👋 Bienvenido al asistente virtual de Glaretum. Estoy aquí para ayudarte con lo que necesites. ¿En qué te puedo asistir hoy?')
-    .addAnswer([
-        'Por favor, elige una de las siguientes opciones:',
-        '1. Hacer una reservacion',
-        '2. Consultar el costo de reparacion',
-        '3. Ver el estatus de tu orden',
-        '4. Otra informacion'
-    ],
-        { capture: true },
-        // {
-        //     buttons: [
-        //         { body: 'Hacer una reservacion' },
-        //         { body: 'Consultar el costo de reparacion' },
-        //         { body: 'Ver el estatus de tu orden' },
-        //         { body: 'Otra informacion' }
-        //     ]
-        // }
-        async (ctx, { fallBack, flowDynamic }) => {
-            const body = ctx.body;
-            switch (body) {
-                case '1':
-                case 'Hacer una reservacion':
-                    return await flowDynamic('Escogiste hacer reservacion');
-                case '2':
-                case 'Consultar el costo de reparacion':
-                    return await flowDynamic('Escogiste consultar el precio de una reparacion');
-                case '3':
-                case 'Ver el estatus de tu orden':
-                case '4':
-                case 'Otra informacion':
-                    return await flowDynamic('Un momento mientras te transfiero con un especialista');
-                default:
-                    return fallBack(
-                        "Respuesta no válida, por favor selecciona una de las opciones."
-                    );
-            }
-        }
-    )
 
 // const menu = "Este es el menu de opciones, elegi opciones 1,2,3,4,5 o 0"
 const menuFlow = addKeyword<Provider, Database>("Menu").addAnswer(
@@ -92,8 +53,50 @@ const menuFlow = addKeyword<Provider, Database>("Menu").addAnswer(
     }
 );
 
+const welcomeFlow = addKeyword<Provider, Database>(EVENTS.WELCOME)
+    .addAnswer('¡Hola! 👋 Bienvenido al asistente virtual de Glaretum. Estoy aquí para ayudarte con lo que necesites. ¿En qué te puedo asistir hoy?')
+    .addAnswer([
+        'Por favor, elige una de las siguientes opciones:',
+        '1. Hacer una reservacion',
+        '2. Consultar el costo de reparacion',
+        '3. Ver el estatus de tu orden',
+        '4. Otra informacion',
+        'Solo responde con el número de la opción que prefieras, y con gusto te asistiré. 😊'
+    ],
+        { capture: true },
+        // {
+        //     buttons: [
+        //         { body: 'Hacer una reservacion' },
+        //         { body: 'Consultar el costo de reparacion' },
+        //         { body: 'Ver el estatus de tu orden' },
+        //         { body: 'Otra informacion' }
+        //     ]
+        // }
+        async (ctx, { gotoFlow, fallBack, flowDynamic, globalState }) => {
+            const body = ctx.body;
+            switch (body) {
+                case '1':
+                case 'Hacer una reservacion':
+                    await globalState.update({ choice: body });
+                    return gotoFlow(reservacionFlow);
+                case '2':
+                case 'Consultar el costo de reparacion':
+                    return await flowDynamic('Escogiste consultar el precio de una reparacion');
+                case '3':
+                case 'Ver el estatus de tu orden':
+                case '4':
+                case 'Otra informacion':
+                    return await flowDynamic('Un momento mientras te transfiero con un especialista');
+                default:
+                    return fallBack(
+                        "Respuesta no válida, por favor selecciona una de las opciones."
+                    );
+            }
+        }
+    )
+
 const main = async () => {
-    const adapterFlow = createFlow([welcomeFlow, reservarFlow, menuRestFlow, consultasFlow, menuFlow])
+    const adapterFlow = createFlow([welcomeFlow, reservacionFlow, horarioLVFlow, horarioSFlow, confirmacionReservacionFlow])
     const adapterProvider = createProvider(Provider, {
         jwtToken: process.env.jwtToken,
         numberId: process.env.numberId,
