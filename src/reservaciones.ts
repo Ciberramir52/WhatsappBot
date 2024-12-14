@@ -3,17 +3,17 @@ import { MemoryDB as Database } from '@builderbot/bot'
 import { MetaProvider as Provider } from '@builderbot/provider-meta'
 
 export const confirmacionReservacionFlow = addKeyword<Provider, Database>(EVENTS.ACTION)
-    .addAnswer('¡Tu cita ha sido agendada correctamente! 🎉 Aquí está la información que proporcionaste:',
-        { capture: true },
-        async (ctx, { globalState, flowDynamic }) => {
-            return await flowDynamic([
-                `Sucursal: ${globalState.get('sucursal')}`,
-                `Día: ${globalState.get('dia')}`,
-                `Horario: ${globalState.get('horario')}`
-            ])
-        })
+    // .addAnswer('¡Tu cita ha sido agendada correctamente! 🎉 Aquí está la información que proporcionaste:',
+    //     null,
+    //     async (_, { globalState, flowDynamic }) => {
+    //         return await flowDynamic([
+    //             `Sucursal: ${globalState.get('sucursal')}`,
+    //             `Día: ${globalState.get('dia')}`,
+    //             `Horario: ${globalState.get('horario')}`
+    //         ])
+    //     })
     .addAnswer('Si toda la información es correcta, por favor confirma tu cita eligiendo una de las siguientes opciones:',
-        { buttons: [{ body: 'Confirmar' }, { body: 'Hacer cambio' }] },
+        { buttons: [{ body: 'Confirmar' }, { body: 'Hacer cambio' }], capture: true },
         async (ctx, { flowDynamic, gotoFlow }) => {
             if (ctx.body === 'Confirmar') return await flowDynamic('Agradecemos mucho tu preferencia y estamos felices de poder atenderte. ¡Esperamos verte pronto! 😊')
             else return gotoFlow(reservacionFlow)
@@ -42,43 +42,39 @@ export const horarioLVFlow = addKeyword<Provider, Database>(EVENTS.ACTION)
             if (!['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'].includes(ctx.body)) return fallBack('Opcion no valida, vuelve a intentarlo')
             switch (ctx.body) {
                 case "1":
-                    await globalState.update({ horario: '9:00 AM - 10:00 AM' });
-                    break
+                    return await globalState.update({ horario: '9:00 AM - 10:00 AM' });
                 case "2":
-                    await globalState.update({ horario: '10:00 AM - 11:00 AM' });
-                    break;
+                    return await globalState.update({ horario: '10:00 AM - 11:00 AM' });
                 case "3":
-                    await globalState.update({ horario: '11:00 AM - 12:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '11:00 AM - 12:00 PM' });
                 case "4":
-                    await globalState.update({ horario: '12:00 PM - 1:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '12:00 PM - 1:00 PM' });
                 case "5":
-                    await globalState.update({ horario: '1:00 PM - 2:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '1:00 PM - 2:00 PM' });
                 case "6":
-                    await globalState.update({ horario: '2:00 PM - 3:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '2:00 PM - 3:00 PM' });
                 case "7":
-                    await globalState.update({ horario: '3:00 PM - 4:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '3:00 PM - 4:00 PM' });
                 case "8":
-                    await globalState.update({ horario: '4:00 PM - 5:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '4:00 PM - 5:00 PM' });
                 case "9":
-                    await globalState.update({ horario: '5:00 PM - 6:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '5:00 PM - 6:00 PM' });
                 case "10":
-                    await globalState.update({ horario: '6:00 PM - 7:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '6:00 PM - 7:00 PM' });
                 default:
-                    await globalState.update({ horario: '7:00 PM - 7:40 PM' });
-                    break;
+                    return await globalState.update({ horario: '7:00 PM - 7:40 PM' });
             }
-            return gotoFlow(confirmacionReservacionFlow);
         }
-
     )
+    .addAction(async (ctx, { globalState, flowDynamic, gotoFlow }) => {
+        await flowDynamic('¡Tu cita ha sido agendada correctamente! 🎉 Aquí está la información que proporcionaste:');
+        await flowDynamic([
+            `Sucursal: ${globalState.get('sucursal')}`,
+            `Día: ${globalState.get('dia')}`,
+            `Horario: ${globalState.get('horario')}`
+        ])
+        return gotoFlow(confirmacionReservacionFlow);
+    })
 
 export const horarioSFlow = addKeyword<Provider, Database>(EVENTS.ACTION)
     .addAnswer('¡Perfecto! Ahora que elegiste el día, selecciona el horario que más te convenga para tu cita.')
@@ -98,31 +94,32 @@ export const horarioSFlow = addKeyword<Provider, Database>(EVENTS.ACTION)
             if (!['1', '2', '3', '4', '5', '6', '7'].includes(ctx.body)) return fallBack('Opcion no valida, vuelve a intentarlo')
             switch (ctx.body) {
                 case "1":
-                    await globalState.update({ horario: '9:00 AM - 10:00 AM' });
-                    break
+                    return await globalState.update({ horario: '9:00 AM - 10:00 AM' });
                 case "2":
-                    await globalState.update({ horario: '10:00 AM - 11:00 AM' });
-                    break;
+                    return await globalState.update({ horario: '10:00 AM - 11:00 AM' });
                 case "3":
-                    await globalState.update({ horario: '11:00 AM - 12:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '11:00 AM - 12:00 PM' });
                 case "4":
-                    await globalState.update({ horario: '12:00 PM - 1:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '12:00 PM - 1:00 PM' });
                 case "5":
-                    await globalState.update({ horario: '1:00 PM - 2:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '1:00 PM - 2:00 PM' });
                 case "6":
-                    await globalState.update({ horario: '2:00 PM - 3:00 PM' });
-                    break;
+                    return await globalState.update({ horario: '2:00 PM - 3:00 PM' });
                 default:
-                    await globalState.update({ horario: '3:00 PM - 3:40 PM' });
-                    break;
+                    return await globalState.update({ horario: '3:00 PM - 3:40 PM' });
             }
-            return gotoFlow(confirmacionReservacionFlow);
         }
 
     )
+    .addAction(async (ctx, { globalState, flowDynamic, gotoFlow }) => {
+        await flowDynamic('¡Tu cita ha sido agendada correctamente! 🎉 Aquí está la información que proporcionaste:');
+        await flowDynamic([
+            `Sucursal: ${globalState.get('sucursal')}`,
+            `Día: ${globalState.get('dia')}`,
+            `Horario: ${globalState.get('horario')}`
+        ])
+        return gotoFlow(confirmacionReservacionFlow);
+    })
 
 export const reservacionFlow = addKeyword<Provider, Database>(EVENTS.ACTION)
     .addAnswer(`Este es para consultas¡Genial! Para ayudarte a hacer la reservación, necesito saber a qué sucursal te gustaría agendarla.`)
